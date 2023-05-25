@@ -6,9 +6,13 @@
 #include<iostream>
 
 #define ES 1
-#define in_BITS 16
+#define in_BITS 32
 #define out_BITS 32
 #define MAC_BIT 8
+
+#define NI 4
+#define NJ 4
+#define NK 4
 
 using namespace std;
 
@@ -60,6 +64,8 @@ __device__ __host__ void posit_mac(uint32_t*, uint32_t*, uint64_t*, uint64_t*, i
 __device__ __host__ void posit_mac_pdpu(uint32_t*, uint32_t*, uint64_t*, uint64_t*, int, int);
 uint32_t mac_dpu(uint32_t*, uint32_t*,uint32_t*);
 __global__ void a_mul_b_device(uint32_t*, uint32_t*, uint64_t*);
+__global__ void mul_add_device(uint32_t*,uint32_t*,uint64_t*,uint64_t*);
+void PTC(uint32_t*,uint32_t*,uint32_t*,uint32_t*);
 template <typename T>
 void matrix_print(T *a){
     cout << "" << endl;
