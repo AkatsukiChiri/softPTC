@@ -11,7 +11,7 @@
 using namespace std;
 
 //A*B+C 功能测试
-int main(){
+int main_ptc(){
     PositTensorCore M;
     uint32_t a[16];
     uint32_t b[16];
@@ -29,120 +29,122 @@ int main(){
     M.mul_add();
     matrix_print<uint64_t>(M.c);
     matrix_print<uint64_t>(M.out);
+    return 0;
 }
 
 //mdu test
-// int main(){
-//     double wgts_data[147];
-//     double acts_data[147];
-//     double outs_data;
-//     int row = 38;
-//     int column = 12500;
-//     double mse = 0;
+int main_mdu_test(){
+    double wgts_data[147];
+    double acts_data[147];
+    double outs_data;
+    int row = 38;
+    int column = 12500;
+    double mse = 0;
 
-//     uint32_t *a,*b;
-//     posit32_t posit;
+    uint32_t *a,*b;
+    posit32_t posit;
 
-//     a = (uint32_t*)malloc(N * sizeof(uint32_t));
-//     b = (uint32_t*)malloc(N * sizeof(uint32_t));
-//     uint32_t acc[1] = {0};
-//     posit32_t posit_out;
-//     for(row=1;row<64;row++){
-//         for(column=1;column<4;column++){
-//             //读取表格中数据
-//             read_wgts_mat_row(row,wgts_data);
-//             read_acts_mat_column(column,acts_data);
-//             outs_data = read_outs_mat_row_column(row,column);
+    a = (uint32_t*)malloc(N * sizeof(uint32_t));
+    b = (uint32_t*)malloc(N * sizeof(uint32_t));
+    uint32_t acc[1] = {0};
+    posit32_t posit_out;
+    for(row=1;row<64;row++){
+        for(column=1;column<4;column++){
+            //读取表格中数据
+            read_wgts_mat_row(row,wgts_data);
+            read_acts_mat_column(column,acts_data);
+            outs_data = read_outs_mat_row_column(row,column);
 
-//             //将double数据转换为posit格式并存入ab中
-//             for(int i=0;i<N;i++){
-//                 posit = convertDoubleToPosit(wgts_data[i],in_BITS,ES);
-//                 a[i] = posit.v;
-//                 posit = convertDoubleToPosit(acts_data[i],in_BITS,ES);
-//                 b[i] = posit.v;
-//             }
-//             acc[0] = 0;
-//             posit_out.v = mac_dpu(a,b,acc);
-//             mse += abs(convertPositToDouble(posit_out,out_BITS,ES)-outs_data);
-//             // cout<<"原始数据"<<outs_data<<endl;
-//             // cout<<"输出"<<convertPositToDouble(posit_out,out_BITS,ES)<<endl;
-//         }
-//         cout<<row<<"/63"<<endl;
-//     }
-//     mse /= (63*3);
-//     cout << mse << endl;
-// }
+            //将double数据转换为posit格式并存入ab中
+            for(int i=0;i<N;i++){
+                posit = convertDoubleToPosit(wgts_data[i],in_BITS,ES);
+                a[i] = posit.v;
+                posit = convertDoubleToPosit(acts_data[i],in_BITS,ES);
+                b[i] = posit.v;
+            }
+            acc[0] = 0;
+            posit_out.v = mac_dpu(a,b,acc);
+            mse += abs(convertPositToDouble(posit_out,out_BITS,ES)-outs_data);
+            // cout<<"原始数据"<<outs_data<<endl;
+            // cout<<"输出"<<convertPositToDouble(posit_out,out_BITS,ES)<<endl;
+        }
+        cout<<row<<"/63"<<endl;
+    }
+    mse /= (63*3);
+    cout << mse << endl;
+    return 0;
+}
 
 //pdpu
-// int main(){
-//     double wgts_data[147];
-//     double acts_data[147];
-//     double outs_data;
-//     int row = 38;
-//     int column = 12500;
+int main_pdpu(){
+    double wgts_data[147];
+    double acts_data[147];
+    double outs_data;
+    int row = 38;
+    int column = 12500;
 
-//     for(row=0;row<64;row++){
-//         for(column=0;column<12544;column++){
+    for(row=0;row<64;row++){
+        for(column=0;column<12544;column++){
 
-//         }
-//     }
-//     //读取表格中数据
-//     read_wgts_mat_row(row,wgts_data);
-//     read_acts_mat_column(column,acts_data);
-//     outs_data = read_outs_mat_row_column(row,column);
+        }
+    }
+    //读取表格中数据
+    read_wgts_mat_row(row,wgts_data);
+    read_acts_mat_column(column,acts_data);
+    outs_data = read_outs_mat_row_column(row,column);
 
-//     uint32_t *a,*b;
-//     posit32_t posit;
+    uint32_t *a,*b;
+    posit32_t posit;
 
-//     a = (uint32_t*)malloc(N * sizeof(uint32_t));
-//     b = (uint32_t*)malloc(N * sizeof(uint32_t));
-//     // fin_out = (align_m*)malloc(NUM_BLOCKS * sizeof(align_m));
+    a = (uint32_t*)malloc(N * sizeof(uint32_t));
+    b = (uint32_t*)malloc(N * sizeof(uint32_t));
+    // fin_out = (align_m*)malloc(NUM_BLOCKS * sizeof(align_m));
 
-//     //将double数据转换为posit格式并存入ab中
-//     for(int i=0;i<N;i++){
-//         posit = convertDoubleToPosit(wgts_data[i],in_BITS,ES);
-//         a[i] = posit.v;
-//         posit = convertDoubleToPosit(acts_data[i],in_BITS,ES);
-//         b[i] = posit.v;
-//         // a[i] = 0x3000;
-//         // b[i] = 0x2000;
-//     }
-//     //原矩阵输出
-//     posit = convertDoubleToPosit(outs_data,out_BITS,ES);
-//     printf("%x\n",posit.v);
-//     printf("%lf\n",outs_data);
+    //将double数据转换为posit格式并存入ab中
+    for(int i=0;i<N;i++){
+        posit = convertDoubleToPosit(wgts_data[i],in_BITS,ES);
+        a[i] = posit.v;
+        posit = convertDoubleToPosit(acts_data[i],in_BITS,ES);
+        b[i] = posit.v;
+        // a[i] = 0x3000;
+        // b[i] = 0x2000;
+    }
+    //原矩阵输出
+    posit = convertDoubleToPosit(outs_data,out_BITS,ES);
+    printf("%x\n",posit.v);
+    printf("%lf\n",outs_data);
     
-//     posit32_t posit_out;
-//     uint32_t acc[1] = {0};
-//     // // //调用PDPU
-//     // posit_out.v = cuPDPU_16(a,b)<<16;
-//     // //PDPU输出
-//     // printf("%x\n",posit_out.v);
-//     // printf("%lf\n",convertPositToDouble(posit_out,16,ES));
+    posit32_t posit_out;
+    uint32_t acc[1] = {0};
+    // // //调用PDPU
+    // posit_out.v = cuPDPU_16(a,b)<<16;
+    // //PDPU输出
+    // printf("%x\n",posit_out.v);
+    // printf("%lf\n",convertPositToDouble(posit_out,16,ES));
 
     
-//     posit_out.v = mac_dpu(a,b,acc);
-//     printf("%x\n",posit_out.v);
-//     printf("%lf\n",convertPositToDouble(posit_out,out_BITS,ES));
+    posit_out.v = mac_dpu(a,b,acc);
+    printf("%x\n",posit_out.v);
+    printf("%lf\n",convertPositToDouble(posit_out,out_BITS,ES));
 
-//     // for(int n = NUM_BLOCKS;;n = (n + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK){
-//     //     fin_add<<<(n + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(dout,dfin_out,n);
-//     //     if(n < THREADS_PER_BLOCK) break;
-//     //     else{
-//     //         dout = dfin_out;
-//     //     }
-//     // }
-//     // cudaDeviceSynchronize();
+    // for(int n = NUM_BLOCKS;;n = (n + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK){
+    //     fin_add<<<(n + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>(dout,dfin_out,n);
+    //     if(n < THREADS_PER_BLOCK) break;
+    //     else{
+    //         dout = dfin_out;
+    //     }
+    // }
+    // cudaDeviceSynchronize();
     
-//     // //test
-//     // cudaMemcpy(fin_out, dfin_out, NUM_BLOCKS * sizeof(align_m), cudaMemcpyDeviceToHost);
+    // //test
+    // cudaMemcpy(fin_out, dfin_out, NUM_BLOCKS * sizeof(align_m), cudaMemcpyDeviceToHost);
 
-//     // printf("%llx\n",((int64_t)(fin_out[0].m[0])));//>>(62-ALIGN_BIT));
-//     // printf("%llx\n",fin_out[0].m[1]);
-//     // printf("%llx\n",fin_out[0].m[2]);
-//     // printf("%llx\n",fin_out[0].m[3]);
-    
-// }
+    // printf("%llx\n",((int64_t)(fin_out[0].m[0])));//>>(62-ALIGN_BIT));
+    // printf("%llx\n",fin_out[0].m[1]);
+    // printf("%llx\n",fin_out[0].m[2]);
+    // printf("%llx\n",fin_out[0].m[3]);
+    return 0;
+}
 
 // int main(){
 //     //变量定义
@@ -192,40 +194,46 @@ int main(){
 //     return 0;
 // }
 
-// int main(){
-//     uint32_t test_ab[2] = {0x40000000,0x40000000};
-//     uint64_t test_co[2] = {0x50000000,0};
-//     // uint64_t decode[6] = {0,0,0x000000000000000,0,0,0};
-//     posit_mac(test_ab,test_ab+1,test_co,test_co+1,0,0);
-//     cout<<hex<<test_co[1]<<endl;
-//     // posit_mac(test_ab,test_ab+1,decode,test_co+1,1,0);
-//     // cout<<hex<<test_co[1]<<endl;
-//     return 0;
-// }
+int main_test_mac(){
+    uint32_t test_ab[2] = {0x40000000,0x40000000};
+    uint64_t test_co[2] = {0x50000000,0};
+    // uint64_t decode[6] = {0,0,0x000000000000000,0,0,0};
+    posit_mac(test_ab,test_ab+1,test_co,test_co+1,0,0);
+    cout<<hex<<test_co[1]<<endl;
+    // posit_mac(test_ab,test_ab+1,decode,test_co+1,1,0);
+    // cout<<hex<<test_co[1]<<endl;
+    return 0;
+}
 
 //test decode&encode
+int main_de_encode(){
+    // Posit A;
+    // // posit32_t p = convertDoubleToPosit(0.5,16,ES);
+    // A.init(0x58001000);
+    // cout<<"posit:"<<hex<<A.posit<<endl;
+    // A.decode();
+    // cout<<"e:"<<dec<<A.e<<"\n"<<"m:"<<hex<<A.m<<endl;
+    // A.encode(A.s,A.e,A.m);
+    // cout<<"posit:"<<hex<<A.posit<<endl;
+    frac_align F,F1;
+    F.init(0xffff0000ffff0000);
+    F1.init(0x0000ffff0000ffff);
+    F.shift(1);
+    cout<<hex<<F.m[0]<<endl;
+    F.shift(-2);
+    cout<<hex<<F.m[0]<<endl;
+    F.shift(1);
+    cout<<hex<<F.m[0]<<endl;
+    F.complement();
+    cout<<hex<<F.m[0]<<endl;
+    F.complement();
+    cout<<hex<<F.m[0]<<endl;
+    F.add(F1.m);
+    cout<<hex<<F.m[0]<<endl;
+    return 0;
+}
+
 // int main(){
-//     // Posit A;
-//     // // posit32_t p = convertDoubleToPosit(0.5,16,ES);
-//     // A.init(0x58001000);
-//     // cout<<"posit:"<<hex<<A.posit<<endl;
-//     // A.decode();
-//     // cout<<"e:"<<dec<<A.e<<"\n"<<"m:"<<hex<<A.m<<endl;
-//     // A.encode(A.s,A.e,A.m);
-//     // cout<<"posit:"<<hex<<A.posit<<endl;
-//     frac_align F,F1;
-//     F.init(0xffff0000ffff0000);
-//     F1.init(0x0000ffff0000ffff);
-//     F.shift(1);
-//     cout<<hex<<F.m[0]<<endl;
-//     F.shift(-2);
-//     cout<<hex<<F.m[0]<<endl;
-//     F.shift(1);
-//     cout<<hex<<F.m[0]<<endl;
-//     F.complement();
-//     cout<<hex<<F.m[0]<<endl;
-//     F.complement();
-//     cout<<hex<<F.m[0]<<endl;
-//     F.add(F1.m);
-//     cout<<hex<<F.m[0]<<endl;
+//     main_ptc();
+//     return 0 ;
 // }
