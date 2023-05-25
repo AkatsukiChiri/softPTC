@@ -6,13 +6,13 @@
 #include<iostream>
 
 #define ES 1
-#define in_BITS 32
-#define out_BITS 32
+#define in_BITS 16
+#define out_BITS 16
 #define MAC_BIT 8
 
-#define NI 4
-#define NJ 4
-#define NK 4
+#define NI 16
+#define NJ 16
+#define NK 16
 
 using namespace std;
 
@@ -68,9 +68,11 @@ __global__ void mul_add_device(uint32_t*,uint32_t*,uint64_t*,uint64_t*);
 void PTC(uint32_t*,uint32_t*,uint32_t*,uint32_t*);
 template <typename T>
 void matrix_print(T *a){
-    cout << "" << endl;
-    for(int i=0;i<4;i++){
-        cout<<hex<<a[i*4+0]<<' '<<a[i*4+1]<<' '<<a[i*4+2]<<' '<<a[i*4+3]<<endl;
+    for(int i=0;i<NI;i++){
+        for(int j=0;j<NJ;j++){
+            printf("%lf  ",a[i*NI+j]);
+        }
+        printf("\n");
     }
     return;
 }

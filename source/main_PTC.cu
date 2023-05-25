@@ -10,25 +10,42 @@
 
 using namespace std;
 
+void init(double *a,double *b,double *c){
+    for(int i=0;i<NI*NK;i++) a[i]=(rand()%1000)/200.0-2.5;
+    for(int i=0;i<NJ*NK;i++) b[i]=(rand()%1000)/200.0-2.5;
+    for(int i=0;i<NI*NJ;i++) c[i]=(rand()%1000)/200.0-2.5;
+}
+
+void gemm(double *a,double *b,double *c,double *out){
+    for(int i=0;i<NI;i++){
+        for(int j=0;j<NJ;j++){
+            out[i*NJ+j] = c[i*NJ+j];
+            for(int k=0;k<NK;k++){
+                out[i*NJ+j] += a[i*NJ+k] * b[k*NJ+j];
+            }
+        }
+    }
+}
+
+double MSE(double* out,double* out_double){
+    double err = 0;
+    for(int i=0;i<NI*NJ;i++) err += (out[i]-out_double[i])*(out[i]-out_double[i]);
+    err /= NI*NJ;
+    return err;
+}
+
 void main_ptc_test(){
-    double a[NI*NK] = { 1,0,0,0,
-                        0,0.8,0,0,
-                        0,0,7,0,
-                        0,0,0,0.25,};
-    double b[NJ*NK] = { 1,0,0,0,
-                        0,3,0,0,
-                        0,0,0.1,0,
-                        0,0,0,9,}; 
-    double c[NI*NJ] = { 0,0,2,0,
-                        0,0,0,0.3,
-                        0,5,0,0,
-                        0,0,0,0,};  
-    double out[NI*NJ]={ 0       };
+    double a[NI*NK]   = {0};
+    double b[NJ*NK]   = {0}; 
+    double c[NI*NJ]   = {0};  
+    double out[NI*NJ] = {0};
+
+    init(a,b,c);
 
     uint32_t A[NI*NK] = {0};
     uint32_t B[NJ*NK] = {0};
     uint32_t C[NI*NJ] = {0};
-    uint32_t OUT[16] = {0};
+    uint32_t OUT[NI*NJ] = {0};
 
     for(int i=0;i<NI*NK;i++) A[i] = (convertDoubleToPosit(a[i],in_BITS,ES)).v;
     for(int i=0;i<NJ*NK;i++) B[i] = (convertDoubleToPosit(b[i],in_BITS,ES)).v;
@@ -41,8 +58,15 @@ void main_ptc_test(){
         p.v = OUT[i];
         out[i] = convertPositToDouble(p,out_BITS,ES);
         }
+    
+    double out_double[NI*NJ] = {0};
+    gemm(a,b,c,out_double);
 
-    matrix_print<double>(out);                                       
+    matrix_print<double>(out);    
+    printf("\n");
+    // if(err) printf("the error of MSE is : %lf",err);
+    cout<<"the error of MSE is : "<<MSE(out,out_double)<<endl;
+    // else printf("the same!!");
 }
 
 int main(){
