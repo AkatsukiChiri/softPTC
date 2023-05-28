@@ -70,7 +70,7 @@ __device__ __host__ void Posit::encode(bool s_in, int e_in, uint32_t m_in){
     posit = (k>=0)?((1<<31)-(1<<(32-l_k))):(1<<(31-l_k));
     posit += (ex<<l_f);
     posit += (m-((uint32_t)1<<31)) >> (31-l_f);
-    if(s)posit = (~posit) +1;
     posit = (posit>>(32-n_bits))<<(32-n_bits);
+    if(s)posit = (~posit) +1;
     return;
 }

@@ -25,10 +25,15 @@ __global__ void mul_add_device(uint32_t* a,uint32_t* b,uint64_t* c,uint64_t* out
 
     *(out+x*NJ+y) = *(c+x*NJ+y);
     for(int k=0;k<(NK/4);k++){
-        posit_mac(a+x*NJ+k*4+0,b+(0+k*4)*NJ+y,out+x*NJ+y,decode,0,1);
-        posit_mac(a+x*NJ+k*4+1,b+(1+k*4)*NJ+y,decode,decode,1,1);
-        posit_mac(a+x*NJ+k*4+2,b+(2+k*4)*NJ+y,decode,decode,1,1);
-        posit_mac(a+x*NJ+k*4+3,b+(3+k*4)*NJ+y,decode,out+x*NJ+y,1,0);
+        posit_mac(a+x*NK+k*4+0,b+(0+k*4)*NJ+y,out+x*NJ+y,decode,0,1);
+        posit_mac(a+x*NK+k*4+1,b+(1+k*4)*NJ+y,decode,decode,1,1);
+        posit_mac(a+x*NK+k*4+2,b+(2+k*4)*NJ+y,decode,decode,1,1);
+        posit_mac(a+x*NK+k*4+3,b+(3+k*4)*NJ+y,decode,out+x*NJ+y,1,0);
+
+        // posit_mac(a+x*NK+k*4+0,b+(0+k*4)*NJ+y,out+x*NJ+y,out+x*NJ+y,0,0);
+        // posit_mac(a+x*NK+k*4+1,b+(1+k*4)*NJ+y,out+x*NJ+y,out+x*NJ+y,0,0);
+        // posit_mac(a+x*NK+k*4+2,b+(2+k*4)*NJ+y,out+x*NJ+y,out+x*NJ+y,0,0);
+        // posit_mac(a+x*NK+k*4+3,b+(3+k*4)*NJ+y,out+x*NJ+y,out+x*NJ+y,0,0);
     }
     
     return;

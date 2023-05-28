@@ -122,6 +122,7 @@ __device__ __host__ void posit_mac(uint32_t* a, uint32_t* b, uint64_t* c, uint64
     m_ab.m[0] = ((uint64_t)A.m * (uint64_t)B.m)>>out_BITS;
     m_ab.mask(out_BITS*3);
     if(A.s^B.s) m_ab.complement();
+
     //input mode 0-posit_in 1-decode_in
     Posit C;
     if(in_mode == 0){
@@ -143,6 +144,7 @@ __device__ __host__ void posit_mac(uint32_t* a, uint32_t* b, uint64_t* c, uint64
     }
     //get e_ab
     int e_ab = ((m_ab.m[0]!=0)||(m_ab.m[1]!=0)||(m_ab.m[2]!=0)||(m_ab.m[3]!=0))?(A.e + B.e):0x80000000;
+
     //align
     if((m_c.m[0]|m_c.m[1]|m_c.m[2]|m_c.m[3])==0){C.e = 0x80000000;}
     else if((m_ab.m[0]|m_ab.m[1]|m_ab.m[2]|m_ab.m[3])==0){
@@ -150,8 +152,12 @@ __device__ __host__ void posit_mac(uint32_t* a, uint32_t* b, uint64_t* c, uint64
         e_ab = C.e;
     }
     else{
+        // m_c.mask(out_BITS*2);
+        // m_ab.mask(out_BITS*3);
+        
         if((e_ab-C.e)<=-(out_BITS+1)) {
             m_ab.init(0);
+            m_c.shift(-(out_BITS+1));
             m_ab.add(m_c.m);
         }
         else if((e_ab-C.e)<(2*out_BITS-1)){
@@ -164,14 +170,18 @@ __device__ __host__ void posit_mac(uint32_t* a, uint32_t* b, uint64_t* c, uint64
     //encode
     bool s_out = 0;int e_out;frac_align m_out;int e_raw;
     m_out.m[0] = m_ab.m[0];m_out.m[1] = m_ab.m[1];m_out.m[2] = m_ab.m[2];m_out.m[3] = m_ab.m[3];
-    if(m_ab.m[0]>>63){
+    if((C.e - e_ab)>2){
+        s_out = C.s;
+        if(C.s) m_out.complement();
+    }
+    else if(m_ab.m[0]>>63){
         s_out = 1;
         m_out.complement();
     }
     e_raw = (e_ab >= C.e)?e_ab:C.e;
     e_out = e_raw;
-    int move = (e_ab>=C.e)?(out_BITS+1):(out_BITS+1-(C.e-e_ab));move=(move>0)?move:0;
     
+    int move = (e_ab>=C.e)?(out_BITS+1):(out_BITS+1-(C.e-e_ab));move=(move>0)?move:0;
     //m_out==0
     if((m_out.m[0]==0)&&(m_out.m[1]==0)&&(m_out.m[2]==0)&&(m_out.m[3]==0)){
         if(out_mode==0){
@@ -197,8 +207,8 @@ __device__ __host__ void posit_mac(uint32_t* a, uint32_t* b, uint64_t* c, uint64
         move_actual--;
     }
     e_out = e_raw+move_actual;
-
     m_out.shift(-(move-move_actual));
+
     //output mode 0-posit_out 1-decode_out
     if(out_mode==0){
         Posit O;

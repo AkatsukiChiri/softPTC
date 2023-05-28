@@ -195,9 +195,12 @@ int main_pdpu(){
 // }
 
 int main_test_mac(){
-    uint32_t test_ab[2] = {0x40000000,0x40000000};
-    uint64_t test_co[2] = {0x50000000,0};
+    uint32_t test_ab[2] = {convertDoubleToPosit(0.0135,in_BITS,ES).v,convertDoubleToPosit(2.0335,in_BITS,ES).v};
+    uint64_t test_co[2] = {convertDoubleToPosit(8,in_BITS,ES).v,0};
+    // uint64_t test_co[2] = {0x67000000,0};
+
     // uint64_t decode[6] = {0,0,0x000000000000000,0,0,0};
+    cout<<hex<<"a:"<<test_ab[0]<<"\nb:"<<test_ab[1]<<"\nc:"<<test_co[0]<<endl;
     posit_mac(test_ab,test_ab+1,test_co,test_co+1,0,0);
     cout<<hex<<test_co[1]<<endl;
     // posit_mac(test_ab,test_ab+1,decode,test_co+1,1,0);
@@ -234,6 +237,6 @@ int main_de_encode(){
 }
 
 // int main(){
-//     main_ptc();
+//     main_test_mac();
 //     return 0 ;
 // }
