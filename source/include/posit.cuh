@@ -10,9 +10,9 @@
 #define out_BITS 16
 #define MAC_BIT 8
 
-#define NI 16
-#define NJ 16
-#define NK 16
+#define NI 32
+#define NJ 32
+#define NK 32
 
 using namespace std;
 
@@ -70,7 +70,7 @@ template <typename T>
 void matrix_print(T *a){
     for(int i=0;i<NI;i++){
         for(int j=0;j<NJ;j++){
-            printf("%lf  ",a[i*NI+j]);
+            printf("%x ",a[i*NI+j]);
         }
         printf("\n");
     }
@@ -78,4 +78,10 @@ void matrix_print(T *a){
 }
 
 
+typedef struct {
+    uint32_t r;
+    uint32_t i;
+}posit_im;
+void PTC_im(posit_im*, posit_im*, posit_im*, posit_im*, int);
+void FFT(uint32_t*,int,uint32_t*,uint32_t*);
 #endif

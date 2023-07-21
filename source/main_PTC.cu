@@ -1,5 +1,6 @@
 #include<iostream>
 #include<cuda.h>
+#include<cuda_fp16.h>
 
 #include"include/cupdpu.cuh"
 #include"include/double2posit.cuh"
@@ -27,8 +28,8 @@ void gemm(double *a,double *b,double *c,double *out){
     }
 }
 
-void gemm_fp(double *a,double *b,double *c,double *out){
-    float fp_a,fp_b,fp_c;double fp_out;
+__global__ void gemm_fp_D(double *a,double *b,double *c,double *out){
+    float fp_a,fp_b,fp_c;double fp_ab,fp_out;
     for(int i=0;i<NI;i++){
         for(int j=0;j<NJ;j++){
             fp_c = c[i*NJ+j];
@@ -36,12 +37,29 @@ void gemm_fp(double *a,double *b,double *c,double *out){
             for(int k=0;k<NK;k++){
                 fp_a = a[i*NK+k];
                 fp_b = b[k*NJ+j];
-                fp_out += fp_a * fp_b;
+                fp_ab = fp_a*fp_b;
+                fp_out += fp_ab;
             }
             out[i*NJ+j] = fp_out;
         }
     }
     return;
+}
+
+void gemm_fp(double *a,double *b,double *c,double *out){
+    double *d_a,*d_b,*d_c,*d_out;
+    cudaMalloc(&d_a,NI*NK*sizeof(double));
+    cudaMalloc(&d_b,NJ*NK*sizeof(double));
+    cudaMalloc(&d_c,NI*NJ*sizeof(double));
+    cudaMalloc(&d_out,NI*NJ*sizeof(double));
+
+    cudaMemcpy(d_a,a,NI*NK*sizeof(double),cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b,b,NJ*NK*sizeof(double),cudaMemcpyHostToDevice);
+    cudaMemcpy(d_c,c,NI*NJ*sizeof(double),cudaMemcpyHostToDevice);
+
+    gemm_fp_D<<<1,1>>>(d_a,d_b,d_c,d_out);
+
+    cudaMemcpy(out,d_out,NI*NJ*sizeof(double),cudaMemcpyDeviceToHost);
 }
 
 double MSE(double* out,double* out_double){
@@ -108,6 +126,41 @@ void main_ptc_test(){
     // else printf("the same!!");
 }
 
+void main_PTCim_test()
+{
+    int length = 4;
+    posit_im a[length*length] = {0};
+    posit_im b[length*length]  = {0}; 
+    posit_im c[length*length]  = {0};
+    posit_im out[length*length] = {0};
+    for(int i=0;i<length*length;i++){
+        a[i].r=(convertDoubleToPosit(1,in_BITS,ES)).v;a[i].i=(convertDoubleToPosit(1,in_BITS,ES)).v;
+        b[i].r=(convertDoubleToPosit(1,in_BITS,ES)).v;b[i].i=(convertDoubleToPosit(-1,in_BITS,ES)).v;
+        c[i].r=(convertDoubleToPosit(0,in_BITS,ES)).v;c[i].i=(convertDoubleToPosit(0,in_BITS,ES)).v;
+        out[i].r=(convertDoubleToPosit(0,in_BITS,ES)).v;out[i].i=(convertDoubleToPosit(0,in_BITS,ES)).v;
+    }
+    PTC_im(a,b,c,out,length);
+    printf("%x",out[0].r);
+}
+
+void main_FFT(){
+    int length = 16;
+    double x[length] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+    uint32_t p_x[length]={0};
+    double out_r[length]={0},out_i[length]={0};
+    uint32_t p_out_r[length]={0},p_out_i[length]={0};
+    for(int i=0;i<length;i++) p_x[i] = (convertDoubleToPosit(x[i],in_BITS,ES)).v;
+    FFT(p_x,length,p_out_r,p_out_i);
+    posit32_t p;
+    for(int i=0;i<length;i++) {
+        p.v = p_out_r[i];
+        out_r[i] = convertPositToDouble(p,out_BITS,ES);
+        p.v = p_out_i[i];
+        out_i[i] = convertPositToDouble(p,out_BITS,ES);
+    }
+    for(int i=0;i<length;i++) printf("%lf + %lfi\n",out_r[i],out_i[i]);
+}
+
 int main(){
-    main_ptc_test();
+    main_FFT();
 }
